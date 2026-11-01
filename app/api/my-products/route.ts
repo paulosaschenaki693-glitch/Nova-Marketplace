@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {requireUser} from '@/lib/auth';import {prisma} from '@/lib/prisma';
+export async function GET(){const user=await requireUser(['STUDENT','MERCHANT']);if(!user)return NextResponse.json({error:'Sign in with an approved seller account.'},{status:401});return NextResponse.json(await prisma.product.findMany({where:{sellerId:user.id},include:{category:true,images:true},orderBy:{createdAt:'desc'}}))}

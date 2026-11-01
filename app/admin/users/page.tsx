@@ -1,0 +1,1 @@
+import {AdminQueue} from '@/components/admin-queue';export default function AdminUsers(){return <><div className="shell section"><h1>Account review</h1><p className="muted">Review student and merchant applications separately from listing moderation.</p><AdminQueue kind="users"/></div></>}

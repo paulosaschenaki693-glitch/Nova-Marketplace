@@ -1,0 +1,2 @@
+import Link from 'next/link';import {AuthShell,LoginForm} from '@/components/auth-form';
+export default function StudentLogin(){return <AuthShell title="Student sign in" subtitle="Sign in with the email address and password you registered with."><LoginForm role="STUDENT"/><p className="muted" style={{fontSize:12,textAlign:'center',marginBottom:0}}>Need an account? <Link href="/register/student" style={{color:'var(--purple2)'}}>Register as a student</Link></p></AuthShell>}

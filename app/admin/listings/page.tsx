@@ -1,0 +1,1 @@
+import {AdminQueue} from '@/components/admin-queue';export default function AdminListings(){return <><div className="shell section"><h1>Listing review</h1><p className="muted">Only approved listings are visible in the public marketplace.</p><AdminQueue kind="listings"/></div></>}

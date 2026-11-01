@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';import {requireUser} from '@/lib/auth';import {prisma} from '@/lib/prisma';
+export async function GET(){const user=await requireUser();if(!user)return NextResponse.json({error:'Sign in required.'},{status:401});return NextResponse.json(await prisma.notification.findMany({where:{userId:user.id},orderBy:{createdAt:'desc'},take:100}))}
+export async function PATCH(req:Request){const user=await requireUser();if(!user)return NextResponse.json({error:'Sign in required.'},{status:401});const {notificationId}=await req.json();const result=await prisma.notification.updateMany({where:{id:notificationId,userId:user.id},data:{readAt:new Date()}});return NextResponse.json({ok:result.count>0})}

@@ -1,0 +1,2 @@
+import Link from 'next/link';import {AuthShell,RegisterForm} from '@/components/auth-form';
+export default function StudentRegister(){return <AuthShell title="Student registration" subtitle="Create your account with your Woldiya University student details."><RegisterForm role="STUDENT"/><p className="muted" style={{fontSize:12,textAlign:'center',marginBottom:0}}>Already registered? <Link href="/login/student" style={{color:'var(--purple2)'}}>Sign in</Link></p></AuthShell>}

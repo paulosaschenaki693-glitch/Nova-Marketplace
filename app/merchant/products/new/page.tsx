@@ -1,0 +1,2 @@
+import {Header,Footer} from '@/components/header';import {ListingForm} from '@/components/listing-form';
+export default function NewMerchantProduct(){return <><Header/><main className="shell section"><span className="pill">MERCHANT · 20% COMMISSION</span><h1 style={{fontSize:32}}>Add a product</h1><p className="muted">Submit your product for review before publication.</p><ListingForm/></main><Footer/></>}

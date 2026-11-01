@@ -1,0 +1,6 @@
+'use client';
+import {createContext,useContext,useEffect,useState} from 'react';
+export type CartItem={productId:string;title:string;price:number;emoji?:string;imageUrl?:string;sellerType:'STUDENT'|'MERCHANT';quantity:number};
+type C={items:CartItem[];add:(i:CartItem)=>void;remove:(id:string)=>void;setQty:(id:string,n:number)=>void;clear:()=>void};const Ctx=createContext<C>({items:[],add:()=>{},remove:()=>{},setQty:()=>{},clear:()=>{}});
+export function CartProvider({children}:{children:React.ReactNode}){const [items,setItems]=useState<CartItem[]>([]);const [hydrated,setHydrated]=useState(false);useEffect(()=>{try{setItems(JSON.parse(localStorage.getItem('nova-cart')||'[]'))}catch{}finally{setHydrated(true)}},[]);useEffect(()=>{if(hydrated)localStorage.setItem('nova-cart',JSON.stringify(items))},[items,hydrated]);const value:C={items,add:i=>setItems(old=>{const found=old.find(x=>x.productId===i.productId);return found?old.map(x=>x.productId===i.productId?{...x,quantity:Math.min(20,x.quantity+1)}:x):[...old,i]}),remove:id=>setItems(old=>old.filter(x=>x.productId!==id)),setQty:(id,n)=>setItems(old=>old.map(x=>x.productId===id?{...x,quantity:Math.max(1,Math.min(20,n))}:x)),clear:()=>setItems([])};return <Ctx.Provider value={value}>{children}</Ctx.Provider>}
+export function useCart(){return useContext(Ctx)}

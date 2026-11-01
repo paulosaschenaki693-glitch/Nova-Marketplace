@@ -1,0 +1,2 @@
+import {Header,Footer} from '@/components/header';import {ListingForm} from '@/components/listing-form';
+export default function NewStudentListing(){return <><Header/><main className="shell section"><span className="pill">STUDENT SELLER · 10% COMMISSION</span><h1 style={{fontSize:32}}>Create a listing</h1><p className="muted">Share accurate details. Your listing will be reviewed before it appears publicly.</p><ListingForm/></main><Footer/></>}

@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';
+export async function GET(){return NextResponse.json({PAYMENT_TELEBIRR_ACCOUNT_NAME:process.env.PAYMENT_TELEBIRR_ACCOUNT_NAME||'Nova Campus Marketplace',PAYMENT_TELEBIRR_NUMBER:process.env.PAYMENT_TELEBIRR_NUMBER||'',PAYMENT_CBE_ACCOUNT_NAME:process.env.PAYMENT_CBE_ACCOUNT_NAME||'Nova Campus Marketplace',PAYMENT_CBE_ACCOUNT_NUMBER:process.env.PAYMENT_CBE_ACCOUNT_NUMBER||'',PAYMENT_BOA_ACCOUNT_NAME:process.env.PAYMENT_BOA_ACCOUNT_NAME||'Nova Campus Marketplace',PAYMENT_BOA_ACCOUNT_NUMBER:process.env.PAYMENT_BOA_ACCOUNT_NUMBER||''})}

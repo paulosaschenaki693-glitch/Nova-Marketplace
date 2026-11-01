@@ -1,0 +1,2 @@
+import Link from 'next/link';import {AuthShell,RegisterForm} from '@/components/auth-form';
+export default function MerchantRegister(){return <AuthShell title="Merchant registration" subtitle="Set up your shop account to reach the campus community."><RegisterForm role="MERCHANT"/><p className="muted" style={{fontSize:12,textAlign:'center',marginBottom:0}}>Already registered? <Link href="/login/merchant" style={{color:'var(--purple2)'}}>Sign in</Link></p></AuthShell>}

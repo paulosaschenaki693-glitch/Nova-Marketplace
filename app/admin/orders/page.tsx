@@ -1,0 +1,1 @@
+import {AdminQueue} from '@/components/admin-queue';export default function AdminOrders(){return <><div className="shell section"><h1>Order coordination</h1><p className="muted">Track combined buyer orders and coordinate each seller's fulfillment behind the scenes.</p><AdminQueue kind="orders"/></div></>}
