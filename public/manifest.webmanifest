@@ -1,6 +1,6 @@
 {
   "name": "Nova Campus Marketplace",
-  "short_name": "Nova",
+  "short_name": "Nova Campus",
   "description": "Buy and sell within the Woldiya University community.",
   "start_url": "/",
   "display": "standalone",
