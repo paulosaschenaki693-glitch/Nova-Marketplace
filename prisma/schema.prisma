@@ -107,6 +107,10 @@ model User {
   reviewedAt DateTime?
   reviewedById String?
   reviewNote String?
+  deletedAt DateTime?
+  verificationMethod String?
+  verificationReason String?
+  studentIdStorageKey String?
   products Product[]
   buyerOrders Order[] @relation("BuyerOrders")
   sellerItems OrderItem[] @relation("ItemSeller")
@@ -125,6 +129,7 @@ model Category {
   slug String @unique
   isActive Boolean @default(true)
   sortOrder Int @default(0)
+  listingTemplate Json?
   products Product[]
   createdAt DateTime @default(now())
 }
@@ -141,6 +146,8 @@ model Product {
   locationText String?
   status ListingStatus @default(PENDING_REVIEW)
   moderationNote String?
+  moderationSource String?
+  moderationData Json?
   publishedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -291,6 +298,8 @@ model Notification {
   title String
   body String
   readAt DateTime?
+  priority String @default("NORMAL")
+  emailSentAt DateTime?
   createdAt DateTime @default(now())
   user User @relation(fields:[userId], references:[id], onDelete:Cascade)
   @@index([userId, readAt, createdAt])

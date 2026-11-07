@@ -21,3 +21,8 @@ This archive is an updated copy of the project snapshot supplied for the request
 - TypeScript/TSX syntax parsing passed for changed files.
 - A full TypeScript/Next.js build and live account/checkout regression tests could not be completed in this environment because dependencies could not be installed before the install timeout and the supplied archive does not include runtime environment secrets or a connected database.
 - The checkout intermittent failure was not reproducible without the live runtime. The order route now logs the underlying exception server-side and makes stock reservation transactional, but the actual production root cause still needs confirmation from the server logs when testing this archive with the configured Firebase/Supabase environment.
+
+
+## V4.2 follow-up
+
+The V4.2 completion work is recorded in `IMPLEMENTATION_PROGRESS.md`. The main additions include a real seller listing editor/archive UI for both account types, correct auto-approved registration routing, shared notifications for students and merchants, per-seller admin fulfillment controls, buyer order support details, and the reviewed additive database SQL patch. The project uses Cloudflare R2 for image storage (not Supabase Storage). The source passes syntax transpilation and static route checks, but dependency installation timed out here, so no full TypeScript or Next.js production build is claimed.

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
-import { downloadPrivateFile } from '@/lib/supabase-storage';
+import { downloadPrivateFile } from '@/lib/r2-storage';
 export const runtime = 'nodejs';
 export async function GET(_: Request, { params }: { params: Promise<{ key: string }> }) {
   const user = await requireUser(['ADMIN']); if (!user) return new NextResponse('Forbidden', { status: 403 });

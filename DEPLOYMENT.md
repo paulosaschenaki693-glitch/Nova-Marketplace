@@ -1,13 +1,10 @@
 # Nova Campus Marketplace — setup, test, and deployment
 
-## 1. Create Supabase (database + file storage)
-1. Create a project at https://supabase.com/dashboard.
+## 1. Create Supabase PostgreSQL and Cloudflare R2 storage
+1. Create a Supabase project. This application uses Supabase for PostgreSQL only; product photos and private verification/payment images are stored in Cloudflare R2.
 2. In **Project Settings → Database**, copy the PostgreSQL connection strings.
 3. Put the transaction-pooler connection string in `DATABASE_URL` (port 6543, include `?pgbouncer=true&connection_limit=1`). Put a direct database connection string in `DIRECT_URL` (usually port 5432). If your network/host cannot use direct IPv6, use Supabase's session pooler connection for `DIRECT_URL`.
-4. In **Storage**, create two buckets with these exact names:
-   - `product-images` — **Public** (product photos are public marketplace content).
-   - `private-documents` — **Private** (student ID images and payment proofs). Do not make this bucket public.
-5. Keep `SUPABASE_SERVICE_ROLE_KEY` server-side only. It bypasses Storage policies and must never use a `NEXT_PUBLIC_` prefix.
+4. Create the two Cloudflare R2 buckets and configure them by following `CLOUDFLARE_R2_SETUP.md`. Do not create Supabase Storage buckets for this application.
 
 ## 2. Create Firebase Authentication
 1. Create a project at https://console.firebase.google.com/.
@@ -22,22 +19,19 @@
 3. Set `NEXT_PUBLIC_APP_URL` to the actual site origin after deployment.
 4. Configure payment account numbers only after you have verified the destination accounts.
 
-## 4. Install, generate the Supabase database schema, and test locally
-Requires a supported Node.js LTS version (Node 20 or newer recommended).
+## 4. Install dependencies, validate schema, and test locally
+Requires Node.js 20 or newer.
 
 ```bash
 npm install
 npx prisma validate
 npx prisma generate
-npx prisma db push
 npm run lint
 npm run build
 npm run dev
 ```
 
-Open http://localhost:3000. Check the home page, register a student with email/password + student ID image, register a merchant, verify new profiles are `PENDING` in Supabase, and test login rejection while pending. After creating an admin (next step), approve a test account and verify the student can log in and use favorites, listing upload, checkout, and payment proof upload.
-
-`prisma db push` creates/updates the PostgreSQL tables in the Supabase database based on `prisma/schema.prisma`. Review the schema changes before running it against a database with valuable data. It does not migrate existing MySQL rows for you.
+Open http://localhost:3000 and test using non-production accounts. This project already targets an existing Supabase PostgreSQL database. Do not run `prisma db push`, `prisma migrate reset`, or seed commands against that database as a routine setup step. First compare the live schema with `prisma/schema.prisma`; use the reviewed additive compatibility SQL documented below for the four known missing nullable `User` columns. For a completely new, empty development database only, `prisma db push` may be used after reviewing the schema and confirming the database contains no data to preserve.
 
 ## 5. Provision the first admin account (manual, private setup)
 1. In Firebase Console → Authentication, manually add an admin email and a strong password. Copy the Firebase user's **UID**.
@@ -59,9 +53,9 @@ Recommended path: Vercel (https://vercel.com/), or another host that supports Ne
 5. After the first deployment, test registration, login, pending-account rejection, admin approval, uploads, product listing, favorites, order creation, and payment review using test accounts.
 
 ## 7. File privacy and free-tier notes
-- `product-images` must be public for public product photo URLs to load.
-- `private-documents` must stay private. The app streams private files only through server routes that require an active admin session.
-- Supabase free plans have usage limits and may pause projects for inactivity. Review current plan limits at https://supabase.com/pricing before using the site for real orders.
+- The public R2 bucket serves product images only. The private R2 bucket stores student ID images and payment screenshots and must remain private.
+- Private files are streamed only through server routes that require an active admin session.
+- Supabase Free plans have usage limits and may pause projects for inactivity. Review current plan limits at https://supabase.com/pricing before using the site for real orders.
 - Configure backups and do not treat an unpaid/free database as your only copy of important order records.
 
 ## Known deployment boundary
@@ -79,3 +73,17 @@ Image uploads now require Cloudflare R2 rather than Supabase Storage. Follow `CL
 - `R2_PUBLIC_BASE_URL` (HTTPS custom domain connected only to the public bucket)
 
 Install dependencies with `npm install` after extracting this update. Sharp converts accepted uploads to WebP. Private verification documents are only streamed through admin-authenticated routes. Existing Supabase image objects are not automatically migrated; keep the old Supabase storage bucket active until existing URLs have been migrated and checked.
+
+
+## Existing Supabase database compatibility (V4)
+
+The current Prisma schema includes four nullable `User` columns that may be absent from an earlier database created before the V4 verification and soft-deactivation work:
+
+- `deletedAt`
+- `verificationMethod`
+- `verificationReason`
+- `studentIdStorageKey`
+
+Before using account moderation, deactivation/restore, or student-ID verification against that existing database, compare the live `public."User"` table with `prisma/schema.prisma`. If those four columns are missing, review and run the additive SQL in `database/migrations/2026-11-05-add-user-verification-fields.sql` using the Supabase SQL Editor. It uses `ADD COLUMN IF NOT EXISTS` and does not delete or rewrite existing records. Do not run `prisma db push`, reset, seed, or destructive migrations against production as a shortcut.
+
+The public product feed and core session lookup use active account status as the soft-deactivation guard, so a missing `deletedAt` column will not break those paths. The admin deactivated-user view and the account soft-delete/restore actions do require the SQL compatibility patch.

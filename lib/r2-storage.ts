@@ -1,5 +1,5 @@
 import 'server-only';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
 import { randomUUID } from 'node:crypto';
 
@@ -31,10 +31,23 @@ export async function uploadMarketplaceFile(file: File, kind: 'product'|'student
   const url = kind === 'product' ? `${publicBase}/${key}` : `${kind === 'student-id' ? 'private' : 'private-payment'}://${key.split('/').pop()}`;
   return { url, storageKey: key, bucket: bucket(kind) };
 }
+
+export async function privateFileExists(key: string) {
+  if (!/^(student-ids|payment-proofs)\/[a-zA-Z0-9-]+\.webp$/.test(key)) return false;
+  const folder = key.startsWith('payment-proofs/') ? 'payment-proof' : 'student-id';
+  try {
+    await client().send(new HeadObjectCommand({ Bucket: bucket(folder), Key: key }));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function downloadPrivateFile(key: string) {
   if (!/^(student-ids|payment-proofs)\/[a-zA-Z0-9-]+\.webp$/.test(key)) return null;
   try {
-    const result = await client().send(new GetObjectCommand({ Bucket: bucket('student-id'), Key: key }));
+    const folder = key.startsWith('payment-proofs/') ? 'payment-proof' : 'student-id';
+    const result = await client().send(new GetObjectCommand({ Bucket: bucket(folder), Key: key }));
     if (!result.Body) return null;
     const bytes = Buffer.from(await result.Body.transformToByteArray());
     return { bytes, contentType: 'image/webp' };
