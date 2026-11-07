@@ -12,9 +12,38 @@ export function Header() {
   async function signOut(){await fetch('/api/auth/logout',{method:'POST'});setUser(null);close();window.location.href='/';}
   const accountLinks = user ? <><Link href="/profile" onClick={close} className="header-profile-link"><span className="profile-avatar header-avatar">{profileLabel}</span><span>Profile</span></Link><button type="button" className="mobile-signout" onClick={signOut}><LogOut size={16}/> Sign out</button></> : <><Link href="/login" onClick={close}>Sign in</Link><Link href="/register" onClick={close}>Create account</Link></>;
   return <header className="topbar"><div className="shell row header-inner" style={{minHeight:72}}>
-    <Link href="/" className="row header-brand" onClick={close}><span className="brandmark">N</span><span style={{display:'grid',lineHeight:1.2}}><b style={{fontFamily:'Manrope',fontSize:16}}>Nova</b><small className="muted" style={{fontSize:10}}>Campus Marketplace</small></span></Link>
+    <Link href="/" className="row header-brand" onClick={close}>
+  <img
+    src="/icon-512.png"
+    alt="Nova Campus"
+    width={42}
+    height={42}
+    style={{
+      width: 42,
+      height: 42,
+      objectFit: 'contain',
+      borderRadius: 9,
+      flexShrink: 0
+    }}
+  />
+  <span style={{ display: 'grid', lineHeight: 1.2 }}>
+    <b style={{ fontFamily: 'Manrope', fontSize: 16 }}>Nova</b>
+    <small className="muted" style={{ fontSize: 10 }}>Campus Marketplace</small>
+  </span>
+</Link>
     <nav className="desktop-nav row" aria-label="Main navigation"><Link className="muted" href="/">Home</Link><Link className="muted" href="/explore">Explore</Link><Link className="muted" href="/start-selling">Start Selling</Link><Link className="muted" href="/support">About/Help</Link></nav>
     <div className="row header-controls" style={{gap:8}}><Link className="btn btn-ghost header-icon" style={{padding:10}} href="/explore" aria-label="Search"><Search size={17}/></Link><Link className="btn btn-ghost header-icon" style={{padding:10}} href="/profile?section=favorites" aria-label="Saved products"><Heart size={17}/></Link><Link className="btn btn-ghost header-icon" style={{padding:10}} href="/cart" aria-label="Cart"><ShoppingCart size={17}/></Link><ThemeToggle/>{loaded&& (user?<Link className="profile-avatar header-avatar" href="/profile" aria-label="Open profile">{profileLabel}</Link>:<Link className="btn btn-primary header-signin" href="/login">Sign in</Link>)}<button type="button" className="btn btn-ghost mobile-menu" aria-label={open?'Close menu':'Open menu'} aria-expanded={open} onClick={()=>setOpen(v=>!v)}>{open?<X size={18}/>:<Menu size={18}/>}</button></div>
   </div>{open&&<nav className="mobile-nav shell" aria-label="Mobile navigation"><Link href="/" onClick={close}>Home</Link><Link href="/explore" onClick={close}>Explore marketplace</Link><Link href="/profile?section=favorites" onClick={close}>♡ Saved products</Link><Link href="/start-selling" onClick={close}>Start Selling</Link><Link href="/support" onClick={close}>About/Help</Link>{user?<><Link href="/profile" onClick={close} className="mobile-profile-row"><span className="profile-avatar header-avatar">{profileLabel}</span><span>Profile overview</span></Link><button type="button" onClick={signOut} className="mobile-signout"><LogOut size={16}/> Sign out</button></>:accountLinks}</nav>}</header>;
 }
-export function Footer(){return <footer className="footer"><div className="shell row" style={{alignItems:'flex-start',flexWrap:'wrap'}}><div><div className="row" style={{justifyContent:'flex-start'}}><span className="brandmark">N</span><b>Nova Campus Marketplace</b></div><p className="muted" style={{fontSize:13}}>Your campus. Your marketplace.</p></div><div className="row" style={{gap:18,flexWrap:'wrap',fontSize:13}}><Link href="/safety">Safety</Link><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/support">Telegram support</Link></div><small className="muted">© {new Date().getFullYear()} Nova Campus Marketplace · Woldiya University</small></div></footer>}
+export function Footer(){return <footer className="footer"><div className="shell row" style={{alignItems:'flex-start',flexWrap:'wrap'}}><div><div className="row" style={{justifyContent:'flex-start'}}><img
+  src="/icon-512.png"
+  alt="Nova Campus"
+  width={36}
+  height={36}
+  style={{
+    width: 36,
+    height: 36,
+    objectFit: 'contain',
+    borderRadius: 8
+  }}
+/><b>Nova Campus Marketplace</b></div><p className="muted" style={{fontSize:13}}>Your campus. Your marketplace.</p></div><div className="row" style={{gap:18,flexWrap:'wrap',fontSize:13}}><Link href="/safety">Safety</Link><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/support">Telegram support</Link></div><small className="muted">© {new Date().getFullYear()} Nova Campus Marketplace · Woldiya University</small></div></footer>}
