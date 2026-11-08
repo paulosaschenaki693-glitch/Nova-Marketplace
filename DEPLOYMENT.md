@@ -87,3 +87,31 @@ The current Prisma schema includes four nullable `User` columns that may be abse
 Before using account moderation, deactivation/restore, or student-ID verification against that existing database, compare the live `public."User"` table with `prisma/schema.prisma`. If those four columns are missing, review and run the additive SQL in `database/migrations/2026-11-05-add-user-verification-fields.sql` using the Supabase SQL Editor. It uses `ADD COLUMN IF NOT EXISTS` and does not delete or rewrite existing records. Do not run `prisma db push`, reset, seed, or destructive migrations against production as a shortcut.
 
 The public product feed and core session lookup use active account status as the soft-deactivation guard, so a missing `deletedAt` column will not break those paths. The admin deactivated-user view and the account soft-delete/restore actions do require the SQL compatibility patch.
+
+
+## V12 additive database update and listing expiry
+
+Before deploying this version, review and apply `database/migrations/2026-11-08-listing-expiry-and-coin-reservations.sql` to the existing Supabase database. It adds reserved coin balance and 30-day listing fields. Existing V11 pending listings with a recorded fee are converted into coin reservations; previously rejected V11 listings with a recorded fee receive a one-time ledgered refund; already published/sold/archived listings retain their historical paid status. It also adds a payment-reference uniqueness index. It does not drop or reset existing data. Review the balance adjustments and verify the exact live table/column names first.
+
+Set `CRON_SECRET` to a long random secret. The included `vercel.json` schedules `/api/cron/expire-listings` daily; Vercel supplies the cron authorization header when configured. If deploying elsewhere, schedule a daily GET with `Authorization: Bearer <CRON_SECRET>`.
+
+Coin purchase submission requires an uploaded private receipt and a transaction reference. Configure the TeleBirr/CBE/BOA account variables before enabling purchases. The wallet UI disables submission when the selected payment account is missing.
+
+New listing submission requires sellers to confirm that their phone number will be publicly visible to buyers. Existing listings retain the V11 public-contact behavior.
+
+Before applying the migration, run the duplicate-reference diagnostic query commented in the SQL file. Resolve any duplicate non-empty payment references manually before creating the unique index; do not delete purchase records.
+
+
+### Database migration order
+
+Apply reviewed SQL compatibility patches in this order when the corresponding fields are not already present:
+1. `2026-11-05-add-user-verification-fields.sql`
+2. `2026-11-08-schema-compatibility.sql`
+3. `2026-11-07-add-coin-and-contact-fields.sql` (only if its coin tables/columns are not already present)
+4. `2026-11-08-listing-expiry-and-coin-reservations.sql`
+
+The SQL uses `IF NOT EXISTS` for additive columns and is designed to be rerun safely. The final migration adds the `EXPIRED` enum value, converts legacy pending/rejected fees, and adds a unique payment-reference index. Export a database backup first because the migration adjusts coin balances. Run the duplicate-reference diagnostic in that file before creating the index. Do not run `prisma db push`, reset, or destructive migrations against the production database as a substitute for reviewing these patches.
+
+Cloudflare R2 token permissions must allow object upload and object read/HEAD operations on the configured private bucket. The coin purchase endpoint verifies the uploaded receipt with a HEAD request before accepting the request.
+
+After the first V12 deployment, unregister the old Nova service worker once (browser DevTools → Application → Service Workers → Unregister), clear the site's cached storage, and hard-refresh. The V12 worker will then take over and will no longer cache Next.js build chunks.

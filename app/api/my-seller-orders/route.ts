@@ -1,2 +1,5 @@
-import {NextResponse} from 'next/server';import {requireUser} from '@/lib/auth';import {prisma} from '@/lib/prisma';
-export async function GET(){const user=await requireUser(['STUDENT','MERCHANT']);if(!user)return NextResponse.json({error:'Sign in with an approved seller account.'},{status:401});const items=await prisma.orderItem.findMany({where:{sellerId:user.id},include:{order:{include:{payment:true,fulfillments:{where:{sellerId:user.id}}}}},orderBy:{order:{createdAt:'desc'}},take:200});return NextResponse.json(items.map(i=>({id:i.id,title:i.titleSnapshot,quantity:i.quantity,unitPrice:i.unitPrice,commissionRate:i.commissionRate,commissionAmount:i.commissionAmount,order:i.order,fulfillment:i.order.fulfillments[0]||null}))) }
+import { NextResponse } from 'next/server';
+export async function GET() { return NextResponse.json({ error: 'This workflow is no longer available. Buyers contact sellers directly; Nova sells listing coins.' }, { status: 410 }); }
+export async function POST() { return NextResponse.json({ error: 'This workflow is no longer available.' }, { status: 410 }); }
+export async function PATCH() { return NextResponse.json({ error: 'This workflow is no longer available.' }, { status: 410 }); }
+export async function DELETE() { return NextResponse.json({ error: 'This workflow is no longer available.' }, { status: 410 }); }

@@ -1,1 +1,2 @@
-import {AdminQueue} from '@/components/admin-queue';export default function AdminPayments(){return <><div className="shell section"><h1>Payment review</h1><p className="muted">Check the real transfer before approving payment proof.</p><AdminQueue kind="payments"/></div></>}
+import { redirect } from 'next/navigation';
+export default function RetiredWorkflowPage() { redirect('/admin/coins'); }

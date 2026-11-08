@@ -1,28 +1,49 @@
-# Nova Campus Marketplace update notes
+# Nova Campus Marketplace — Listing Coins & Direct Contact Model Update (V5)
 
-This archive is an updated copy of the project snapshot supplied for the requested UI, authentication, inventory, checkout, and admin workflow changes. It does not connect to or modify a live database.
+This update transitions Nova Campus Marketplace from the managed-fulfillment/post-sale commission model to a **Prepaid Listing Coins + Direct Buyer-to-Seller Contact** model for Woldia University students and Weldiya town merchants.
 
-## Changes included
+## Summary of Changes
 
-- Replaced category links in the header with Home, Explore, Start Selling, and About/Help; added authenticated profile avatar and a responsive mobile navigation menu.
-- Added `/api/auth/me`, `/profile`, and `/start-selling` flows. Successful login returns to the homepage with a welcome toast. Start Selling routes active students and merchants to their own seller area and blocks non-active accounts.
-- Added a profile hub with overview, security, orders, products, sold-out products, and support sections. Product sections are hidden for admins.
-- Removed hardcoded sample/demo products from Home, Explore, and product detail. Home categories and products now come from the marketplace APIs.
-- Public product queries now exclude zero-stock products and products owned by non-active sellers. Seller stock can be restocked through an ownership-checked endpoint; zero stock marks the listing sold out.
-- Reworked order creation to reserve/decrement inventory in the order transaction, roll back reservations if order creation fails, use collision-resistant order numbers, and log server-side failure details.
-- Made payment selection and order summary use responsive layouts with wrapping for long account details.
-- Replaced admin order “advance” clicks with separate order-status and seller-fulfillment dropdowns; added server-side workflow transition validation. Payment, listing, and account review actions also use dropdowns.
-- Fixed merchant registration validation so the optional student-ID image can be an empty string for merchants.
+### 1. Monetization: Listing Coins Economy
+- **Prepaid Listing Coins**: Sellers purchase coins upfront to publish their products; the marketplace takes **0% post-sale commission**.
+- **Student Discounted Pricing**:
+  - **1 Coin**: Student: 10 ETB | Merchant: 20 ETB
+  - **5 Coins (Starter Pack)**: Student: 50 ETB | Merchant: 90 ETB
+  - **15 Coins (Pro Seller)**: Student: 130 ETB | Merchant: 250 ETB
+  - **Custom Coins**: Student: 12 ETB/coin | Merchant: 22 ETB/coin
+- **Product Price Tier Listing Cost**:
+  - Up to 500 ETB: **1 Coin**
+  - 501 – 2,500 ETB: **2 Coins**
+  - 2,501 – 10,000 ETB: **3 Coins**
+  - Above 10,000 ETB: **5 Coins**
+- **Welcome Coins**: **3 free Listing Coins** automatically credited on 1st-time registration (both auto-approved students and merchants, as well as students approved manually by admins).
 
-## Database and verification notes
+### 2. Direct Buyer-to-Seller Contact
+- Sellers provide their `contactPhone` (prefilled from profile) and optional `telegramHandle` when listing an item.
+- Product detail pages feature prominent, one-click action buttons:
+  - **Call Seller** (`tel:...`)
+  - **Chat on Telegram** (`https://t.me/...`)
+  - **Send SMS** (`sms:...`)
+- Includes campus safety recommendations: advising students to meet in public campus areas (Library, Student Union, Cafeteria) and inspect products in person before payment.
+- Dedicated safety report modal on product pages for reporting scams or prohibited items.
 
-- No Prisma schema change was made, so this archive does not require a schema migration for these code changes.
-- Existing database records are not deleted or modified by this archive. No seed command was run.
-- TypeScript/TSX syntax parsing passed for changed files.
-- A full TypeScript/Next.js build and live account/checkout regression tests could not be completed in this environment because dependencies could not be installed before the install timeout and the supplied archive does not include runtime environment secrets or a connected database.
-- The checkout intermittent failure was not reproducible without the live runtime. The order route now logs the underlying exception server-side and makes stock reservation transactional, but the actual production root cause still needs confirmation from the server logs when testing this archive with the configured Firebase/Supabase environment.
+### 3. AI Moderation Refinement
+- Updated Gemini 2.5 Flash prompt in `lib/gemini.ts` to allow seller phone numbers and Telegram handles.
+- AI screening continues to detect prohibited items (weapons, drugs, counterfeit goods, academic cheating) and offensive content without stripping legitimate seller contacts.
 
+### 4. Admin Management Suite Overhaul
+- **Removed Clunky Dropdowns**: Replaced slow select dropdowns across admin queues with prominent, color-coded, single-click action buttons.
+- **Live Command Center Dashboard** (`/admin/dashboard`): Real-time metrics counters for Pending Coins, Pending Listings, Pending Student IDs, Total Coin Revenue (ETB), and Total Coins Sold.
+- **Coin Approvals Queue** (`/admin/coins`): Inspect bank receipts (TeleBirr, CBE, BOA) and approve or reject coin orders with one click.
+- **User Management & Individual Drawer** (`/admin/users`):
+  - Filter by role (Students vs. Weldiya Merchants) and status.
+  - Clicking any user opens an individual slide-over drawer displaying full contact info, verification details, student ID card zoom, active product listings, coin transaction history, and direct controls (+ / - coin adjustment, suspend, approve).
+- **Visual Category Template Builder** (`/admin/categories`): Replaced raw JSON textareas with an interactive field builder modal to manage category attribute specifications.
 
-## V4.2 follow-up
-
-The V4.2 completion work is recorded in `IMPLEMENTATION_PROGRESS.md`. The main additions include a real seller listing editor/archive UI for both account types, correct auto-approved registration routing, shared notifications for students and merchants, per-seller admin fulfillment controls, buyer order support details, and the reviewed additive database SQL patch. The project uses Cloudflare R2 for image storage (not Supabase Storage). The source passes syntax transpilation and static route checks, but dependency installation timed out here, so no full TypeScript or Next.js production build is claimed.
+### 5. Database & Compatibility
+- Additive schema updates in `prisma/schema.prisma`:
+  - `User.coinBalance`
+  - `Product.contactPhone`, `Product.telegramHandle`, `Product.coinCost`
+  - New `CoinPurchase` model for purchase receipts & manual review
+  - New `CoinTransaction` model for coin ledger logging
+- Reviewable SQL patch provided in `database/migrations/2026-11-07-add-coin-and-contact-fields.sql`. Does not delete or rewrite existing data.

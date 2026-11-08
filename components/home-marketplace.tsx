@@ -1,9 +1,170 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, X } from 'lucide-react';
+import { ArrowRight, X, Sparkles } from 'lucide-react';
 import { ProductActions } from '@/components/product-actions';
 
-export function HomeCategories(){const [categories,setCategories]=useState<any[]>([]);useEffect(()=>{fetch('/api/categories',{cache:'no-store'}).then(r=>r.ok?r.json():[]).then(d=>setCategories(Array.isArray(d)?d:[])).catch(()=>setCategories([]))},[]);return <section className="section category-section" style={{paddingTop:10}}><div className="row" style={{marginBottom:18}}><div><h2 style={{fontSize:26,margin:'0 0 5px'}}>Browse categories</h2><p className="muted" style={{margin:0,fontSize:13}}>Explore campus essentials by category.</p></div><Link className="muted row" href="/explore" style={{fontSize:13}}>All products <ArrowRight size={15}/></Link></div>{categories.length?<div className="category-grid">{categories.map((c:any)=><Link className="category" href={`/explore?category=${c.slug}`} key={c.id}><span className="brandmark category-icon">{c.nameEn==='Electronics'?'⌁':c.nameEn==='Books'?'▤':c.nameEn==='Clothing'?'◈':c.nameEn==='Stationery'?'✎':'✦'}</span><span style={{fontWeight:700}}>{c.nameEn}</span><ArrowRight size={16} className="muted category-arrow"/></Link>)}</div>:<p className="muted">Categories will appear here when configured by the marketplace team.</p>}</section>}
-export function HomeProducts(){const [products,setProducts]=useState<any[]>([]);const [loading,setLoading]=useState(true);useEffect(()=>{let live=true;const load=()=>fetch('/api/products',{cache:'no-store'}).then(r=>r.ok?r.json():[]).then(d=>{if(live)setProducts(Array.isArray(d)?d:[])}).catch(()=>{}).finally(()=>{if(live)setLoading(false)});load();const timer=setInterval(load,20000);return()=>{live=false;clearInterval(timer)}},[]);return <section className="section"><div className="row" style={{marginBottom:18}}><div><h2 style={{fontSize:26,margin:'0 0 5px'}}>Fresh on campus</h2><p className="muted" style={{margin:0,fontSize:13}}>Recently approved listings from campus sellers.</p></div><Link className="muted row" href="/explore" style={{fontSize:13}}>Explore all <ArrowRight size={15}/></Link></div>{loading?<div className="surface" style={{padding:24}}>Loading approved listings…</div>:products.length?<div className="grid-products">{products.slice(0,8).map(p=><article className="surface product-card" key={p.id}><Link href={`/product/${p.id}`}><div className="product-image">{p.images?.[0]?.imageUrl?<img src={p.images[0].imageUrl} alt={p.title} loading="lazy"/>:<span>📦</span>}</div><div className="row" style={{marginTop:13}}><span className="muted" style={{fontSize:11}}>{p.category?.nameEn||'Campus item'}</span><span className="pill">{String(p.condition||'GOOD').replaceAll('_',' ')}</span></div><h3 style={{fontSize:15,margin:'9px 0 5px'}}>{p.title}</h3><b style={{fontSize:17}}>ETB {Number(p.price).toLocaleString()}</b><p className="muted" style={{fontSize:11,margin:'8px 0 0'}}>{p.seller?.role==='MERCHANT'?'Merchant seller':'Student seller'} · reviewed listing</p></Link><ProductActions compact product={{id:p.id,title:p.title,price:Number(p.price),imageUrl:p.images?.[0]?.imageUrl,sellerType:p.seller?.role==='MERCHANT'?'MERCHANT':'STUDENT',quantity:p.quantity}}/></article>)}</div>:<div className="surface empty-marketplace"><h3>No approved products yet</h3><p className="muted">New listings will appear here after sellers submit them and the Nova team approves them.</p><Link className="btn btn-primary" href="/start-selling">Start selling <ArrowRight size={16}/></Link></div>}</section>}
-export function WelcomeToast(){const [show,setShow]=useState(false);useEffect(()=>{const url=new URL(window.location.href);if(url.searchParams.get('welcome')==='1'){setShow(true);url.searchParams.delete('welcome');window.history.replaceState({},'',url.pathname+(url.search?url.search:''));const timer=window.setTimeout(()=>setShow(false),5000);return()=>window.clearTimeout(timer)}},[]);return show?<div role="status" className="welcome-toast"><span><b>Welcome back!</b><small>You’re signed in to Nova Campus Marketplace.</small></span><button aria-label="Dismiss welcome message" onClick={()=>setShow(false)}><X size={17}/></button></div>:null}
+export function HomeCategories() {
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/categories', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : []))
+      .then(d => setCategories(Array.isArray(d) ? d : []))
+      .catch(() => setCategories([]));
+  }, []);
+
+  return (
+    <section className="section category-section" style={{ paddingTop: 10 }}>
+      <div className="row" style={{ marginBottom: 18 }}>
+        <div>
+          <h2 style={{ fontSize: 26, margin: '0 0 5px' }}>Browse categories</h2>
+          <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+            Find textbooks, electronics, clothing, and campus necessities.
+          </p>
+        </div>
+        <Link className="muted row" href="/explore" style={{ fontSize: 13 }}>
+          All products <ArrowRight size={15} />
+        </Link>
+      </div>
+
+      {categories.length ? (
+        <div className="category-grid">
+          {categories.map((c: any) => (
+            <Link className="category" href={`/explore?category=${c.slug}`} key={c.id}>
+              <span className="brandmark category-icon">
+                {c.nameEn === 'Electronics'
+                  ? '⌁'
+                  : c.nameEn === 'Books'
+                  ? '▤'
+                  : c.nameEn === 'Clothing'
+                  ? '◈'
+                  : c.nameEn === 'Stationery'
+                  ? '✎'
+                  : '✦'}
+              </span>
+              <span style={{ fontWeight: 700 }}>{c.nameEn}</span>
+              <ArrowRight size={16} className="muted category-arrow" />
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="muted">Categories will appear here when configured by the marketplace team.</p>
+      )}
+    </section>
+  );
+}
+
+export function HomeProducts() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let live = true;
+    const load = () =>
+      fetch('/api/products', { cache: 'no-store' })
+        .then(r => (r.ok ? r.json() : []))
+        .then(d => {
+          if (live) setProducts(Array.isArray(d) ? d : []);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (live) setLoading(false);
+        });
+
+    load();
+    const timer = setInterval(load, 20000);
+    return () => {
+      live = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  return (
+    <section className="section">
+      <div className="row" style={{ marginBottom: 18 }}>
+        <div>
+          <h2 style={{ fontSize: 26, margin: '0 0 5px' }}>Fresh on campus</h2>
+          <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+            Direct deals from Woldia students and local Weldiya town shops.
+          </p>
+        </div>
+        <Link className="muted row" href="/explore" style={{ fontSize: 13 }}>
+          Explore all <ArrowRight size={15} />
+        </Link>
+      </div>
+
+      {loading ? (
+        <div className="surface" style={{ padding: 24 }}>Loading approved listings…</div>
+      ) : products.length ? (
+        <div className="grid-products">
+          {products.slice(0, 8).map(p => (
+            <article className="surface product-card" key={p.id}>
+              <Link href={`/product/${p.id}`}>
+                <div className="product-image">
+                  {p.images?.[0]?.imageUrl ? <img src={p.images[0].imageUrl} alt={p.title} loading="lazy" /> : <span>📦</span>}
+                </div>
+                <div className="row" style={{ marginTop: 13 }}>
+                  <span className="muted" style={{ fontSize: 11 }}>{p.category?.nameEn || 'Campus item'}</span>
+                  <span className="pill">{String(p.condition || 'GOOD').replaceAll('_', ' ')}</span>
+                </div>
+                <h3 style={{ fontSize: 15, margin: '9px 0 5px' }}>{p.title}</h3>
+                <b style={{ fontSize: 17 }}>ETB {Number(p.price).toLocaleString()}</b>
+                <p className="muted" style={{ fontSize: 11, margin: '6px 0 0' }}>
+                  {p.seller?.role === 'MERCHANT' ? '🏪 Weldiya Merchant' : '🎓 Woldia Student'} · Direct Deal
+                </p>
+              </Link>
+              <ProductActions
+                compact
+                product={{
+                  id: p.id,
+                  title: p.title,
+                  price: Number(p.price),
+                  imageUrl: p.images?.[0]?.imageUrl,
+                  sellerType: p.seller?.role === 'MERCHANT' ? 'MERCHANT' : 'STUDENT',
+                  quantity: p.quantity,
+                }}
+              />
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="surface empty-marketplace">
+          <h3>No listings yet</h3>
+          <p className="muted">Be the first to post! New student and merchant accounts get 3 free listing coins.</p>
+          <Link className="btn btn-primary" href="/start-selling">
+            Start selling free <ArrowRight size={16} />
+          </Link>
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function WelcomeToast() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('welcome') === '1') {
+      setShow(true);
+      url.searchParams.delete('welcome');
+      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+      const timer = window.setTimeout(() => setShow(false), 5000);
+      return () => window.clearTimeout(timer);
+    }
+  }, []);
+
+  return show ? (
+    <div role="status" className="welcome-toast">
+      <span>
+        <b>Welcome back!</b>
+        <small>You’re signed in to Nova Campus Marketplace.</small>
+      </span>
+      <button aria-label="Dismiss welcome message" onClick={() => setShow(false)}>
+        <X size={17} />
+      </button>
+    </div>
+  ) : null;
+}

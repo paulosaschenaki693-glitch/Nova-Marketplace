@@ -13,5 +13,10 @@ export async function POST(req: Request) {
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) return NextResponse.json({ error: 'Use JPG, PNG, WebP, or AVIF.' }, { status: 400 });
     const uploaded = await uploadMarketplaceFile(file, 'payment-proof');
     return NextResponse.json({ url: `private-payment://${uploaded.storageKey.split('/').pop()}`, storageKey: uploaded.storageKey });
-  } catch { return NextResponse.json({ error: 'Payment proof upload failed. Check Cloudflare R2 configuration.' }, { status: 503 }); }
+  } catch (error) {
+    console.error('[uploads.payment-proof] R2 upload failed', error);
+    const message = error instanceof Error ? error.message : '';
+    const safeMessage = message.includes('not configured') || message.includes('Set R2_') ? message : 'Payment receipt storage is temporarily unavailable. Please try again later.';
+    return NextResponse.json({ error: safeMessage }, { status: 503 });
+  }
 }

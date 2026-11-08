@@ -38,8 +38,11 @@ export async function privateFileExists(key: string) {
   try {
     await client().send(new HeadObjectCommand({ Bucket: bucket(folder), Key: key }));
     return true;
-  } catch {
-    return false;
+  } catch (error: any) {
+    const code = error?.$metadata?.httpStatusCode;
+    const name = error?.name;
+    if (code === 404 || name === 'NotFound' || name === 'NoSuchKey') return false;
+    throw error;
   }
 }
 

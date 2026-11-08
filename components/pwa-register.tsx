@@ -16,5 +16,9 @@ export function PwaRegister(){
  },[]);
  async function install(){if(!installEvent)return;await installEvent.prompt();const choice=await installEvent.userChoice;if(choice.outcome==='accepted'){setVisible(false);setInstallEvent(null)}}
  if(!visible||!installEvent)return null;
- return <aside aria-label="Install Nova Marketplace" style={{position:'fixed',zIndex:70,bottom:16,left:'50%',transform:'translateX(-50%)',width:'min(520px,calc(100vw - 24px))',display:'flex',alignItems:'center',gap:12,padding:12,border:'1px solid var(--border)',borderRadius:16,background:'var(--surface)',boxShadow:'0 14px 45px #0002'}}><span className="brandmark">N</span><span style={{flex:1,minWidth:0}}><b style={{display:'block',fontSize:13}}>Install Nova Marketplace</b><small className="muted">Add the marketplace to your home screen.</small></span><button className="btn btn-primary" onClick={install}><Download size={15}/> Install</button><button className="btn btn-ghost" aria-label="Dismiss install prompt" onClick={()=>setVisible(false)}><X size={15}/></button></aside>
+ return <aside aria-label="Install Nova Marketplace" style={{position:'fixed',zIndex:70,bottom:16,left:'50%',transform:'translateX(-50%)',width:'min(520px,calc(100vw - 24px))',display:'flex',alignItems:'center',gap:12,padding:12,border:'1px solid var(--border)',borderRadius:16,background:'var(--surface)',boxShadow:'0 14px 45px #0002'}}><img
+  src="/icon-512.png"
+  alt="Nova Campus Marketplace"
+  className="brandmark-image"
+/><span style={{flex:1,minWidth:0}}><b style={{display:'block',fontSize:13}}>Install Nova Marketplace</b><small className="muted">Add the marketplace to your home screen.</small></span><button className="btn btn-primary" onClick={install}><Download size={15}/> Install</button><button className="btn btn-ghost" aria-label="Dismiss install prompt" onClick={()=>setVisible(false)}><X size={15}/></button></aside>
 }

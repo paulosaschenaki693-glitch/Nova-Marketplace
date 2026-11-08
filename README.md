@@ -47,3 +47,12 @@ A screenshot is not proof by itself; the admin must verify the actual funds rece
 
 ## Notes before public launch
 Test registration, approval, product upload, favorites, combined checkout, payment review, fulfillment, and commission flows against configured projects using non-production accounts. Review privacy/terms/refund policies, enable backups, add rate limiting and monitoring, and verify all payment account details before taking real orders. Free hosting/storage plans have limits and may pause inactive projects. See `DEPLOYMENT.md` for setup.
+
+
+## Current marketplace business model
+
+Nova Campus Marketplace uses prepaid Listing Coins. The approved student packages are 1 coin = ETB 10, 5 coins = ETB 50, and 15 coins = ETB 130. Merchant packages are 1 coin = ETB 20, 5 coins = ETB 90, and 15 coins = ETB 250. Custom purchases use ETB 12 per student coin and ETB 22 per merchant coin. Eligible active accounts receive 3 welcome coins. Listing coin cost is determined by the configured product-price tiers in `lib/coins.ts`.
+
+Listings last 30 days from publication. AI verification that immediately publishes a listing counts as approval and charges the fee at activation. Listings sent to human review reserve coins, then deduct them only after approval; rejection or seller archival releases the reservation. Expired listings can be renewed for another 30 days by paying the listing fee again.
+
+Buyers contact sellers directly. Seller phone numbers are required and the listing form explicitly obtains consent to display the number publicly. Nova does not collect buyer payments or take percentage sales commissions. Legacy order/checkout/commission pages and APIs are retired; historical records are preserved in the database.
