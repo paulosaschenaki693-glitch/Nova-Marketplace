@@ -365,8 +365,8 @@ export default function ProfileHub() {
                 </div>
 
                 <div className="surface profile-details">
-                  <div className="row" style={{justifyContent:"space-between",gap:10,flexWrap:"wrap"}}><h3>Account information</h3><Link href="/profile/edit" className="btn btn-primary">Edit profile</Link></div>
-                  <Link href="/profile/verified" className="btn btn-ghost" style={{marginBottom:12}}>Nova Verified Seller</Link>
+                  <div className="row" style={{justifyContent:"space-between",gap:10,flexWrap:"wrap"}}><h3>Account information</h3>{['STUDENT', 'MERCHANT'].includes(user?.role) && <Link href="/profile/edit" className="btn btn-primary">Edit profile</Link>}</div>
+                  {['STUDENT', 'MERCHANT'].includes(user?.role) && <Link href="/profile/verified" className="btn btn-ghost" style={{marginBottom:12}}>Nova Verified Seller</Link>}
                   <Info label="Name / shop" value={user?.fullName || user?.shopName} />
                   <Info label="Email" value={user?.email} />
                   <Info label="Phone" value={user?.phone} />
