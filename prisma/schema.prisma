@@ -115,6 +115,7 @@ model User {
   fullName String?
   shopName String?
   profileImageUrl String?
+  profileImagePublicConsentAt DateTime?
   bio String?
   publicLocation String?
   telegramHandle String?
