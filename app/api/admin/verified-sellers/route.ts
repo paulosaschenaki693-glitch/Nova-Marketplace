@@ -69,8 +69,10 @@ export async function PATCH(req: Request) {
       if (!['ACTIVE', 'PENDING'].includes(current.status) || reason.length < 5) return NextResponse.json({ error: 'A reason is required for suspension.' }, { status: 409 });
       data = { ...data, status: 'SUSPENDED', suspendedAt: now, suspensionReason: reason };
     } else if (action === 'restore') {
-      if (current.status !== 'SUSPENDED' || !current.expiresAt || current.expiresAt <= now) return NextResponse.json({ error: 'Only a suspended, unexpired verification can be restored.' }, { status: 409 });
-      data = { ...data, status: 'ACTIVE', suspendedAt: null, suspensionReason: null };
+      if (current.status !== 'SUSPENDED') return NextResponse.json({ error: 'Only a suspended application or verification can be restored.' }, { status: 409 });
+      const restoredStatus = current.startsAt && current.expiresAt && current.expiresAt > now ? 'ACTIVE' : !current.startsAt ? 'PENDING' : null;
+      if (!restoredStatus) return NextResponse.json({ error: 'This verification term has expired and cannot be restored.' }, { status: 409 });
+      data = { ...data, status: restoredStatus, suspendedAt: null, suspensionReason: null };
     } else if (action === 'revoke') {
       if (!['ACTIVE', 'SUSPENDED'].includes(current.status) || reason.length < 5) return NextResponse.json({ error: 'A current verification and revocation reason are required.' }, { status: 409 });
       data = { ...data, status: 'REVOKED', revokedAt: now, revocationReason: reason };
