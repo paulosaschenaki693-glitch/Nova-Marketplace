@@ -31,22 +31,26 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: 'Active seller account required.' }, { status: 401 });
   try {
     const now = new Date();
-    const existing = await prisma.verifiedSeller.findFirst({
-      where: { userId: user.id, OR: [{ status: { in: ['PENDING', 'SUSPENDED'] } }, { status: 'ACTIVE', expiresAt: { gt: now } }] },
-      select: { id: true },
-    });
-    if (existing) return NextResponse.json({ error: 'You already have a pending or current verification record.' }, { status: 409 });
-    await prisma.verifiedSeller.updateMany({
-      where: { userId: user.id, status: 'ACTIVE', expiresAt: { lte: now } }, data: { status: 'EXPIRED' },
-    });
     const feeAmount = user.role === 'STUDENT' ? 3999 : 5999;
-    const row = await prisma.verifiedSeller.create({ data: { userId: user.id, feeAmount, currency: 'ETB', status: 'PENDING' } });
+    const row = await prisma.$transaction(async tx => {
+      const existing = await tx.verifiedSeller.findFirst({
+        where: { userId: user.id, OR: [{ status: { in: ['PENDING', 'SUSPENDED'] } }, { status: 'ACTIVE', expiresAt: { gt: now } }] },
+        select: { id: true },
+      });
+      if (existing) throw new Error('VERIFICATION_ALREADY_EXISTS');
+      await tx.verifiedSeller.updateMany({
+        where: { userId: user.id, status: 'ACTIVE', expiresAt: { lte: now } }, data: { status: 'EXPIRED' },
+      });
+      return tx.verifiedSeller.create({ data: { userId: user.id, feeAmount, currency: 'ETB', status: 'PENDING' } });
+    }, { isolationLevel: 'Serializable' });
     await prisma.notification.create({
       data: { userId: user.id, type: 'SYSTEM', title: 'Nova Verified Seller application received',
         body: 'Your application is pending. Nova will review your seller details and arrange the agreement and payment steps. Do not send payment until you receive official instructions.' },
     });
     return NextResponse.json({ ok: true, applicationId: row.id }, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === 'VERIFICATION_ALREADY_EXISTS') return NextResponse.json({ error: 'You already have a pending or current verification record.' }, { status: 409 });
+    if (typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === 'P2034') return NextResponse.json({ error: 'A verification request is already being processed. Refresh and check your verification history.' }, { status: 409 });
     console.error('[verified-seller.POST]', error);
     return NextResponse.json({ error: 'Unable to submit your application.' }, { status: 500 });
   }
