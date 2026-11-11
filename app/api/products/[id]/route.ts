@@ -24,6 +24,10 @@ export async function GET(
             shopName: true,
             fullName: true,
             createdAt: true,
+            profileImageUrl: true,
+            bio: true,
+            publicLocation: true,
+            verifiedSellerRecords: { where: { status: 'ACTIVE', expiresAt: { gt: new Date() } }, select: { id: true, startsAt: true, expiresAt: true }, orderBy: { expiresAt: 'desc' }, take: 1 },
           },
         },
       },
@@ -32,8 +36,8 @@ export async function GET(
     if (!product) {
       return NextResponse.json({ error: 'Product not found or unavailable.' }, { status: 404 });
     }
-
-    return NextResponse.json(product);
+    const { verifiedSellerRecords, ...seller } = product.seller;
+    return NextResponse.json({ ...product, seller: { ...seller, verifiedSeller: verifiedSellerRecords[0] || null } });
   } catch (error) {
     console.error('[products.id.GET]', error);
     return NextResponse.json({ error: 'Unable to load product.' }, { status: 500 });

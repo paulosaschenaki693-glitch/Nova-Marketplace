@@ -15,6 +15,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { ProductGallery } from '@/components/product-gallery';
+import { ProfileAvatar } from '@/components/profile-avatar';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -293,9 +294,17 @@ export default function ProductDetail() {
                   <b>{product.quantity} in stock</b>
                 </div>
 
-                <div>
-                  <span className="muted" style={{ display: 'block', fontSize: 11 }}>Seller</span>
-                  <b>{product.seller?.fullName || product.seller?.shopName || 'Campus Seller'}</b>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <span className="muted" style={{ display: 'block', fontSize: 11, marginBottom: 6 }}>Seller</span>
+                  <div className="row" style={{ justifyContent: 'flex-start', gap: 9 }}>
+                    <ProfileAvatar name={product.seller?.fullName || product.seller?.shopName} imageUrl={product.seller?.profileImageUrl} verified={Boolean(product.seller?.verifiedSeller)} size={38} />
+                    <div>
+                      <b>{product.seller?.shopName || product.seller?.fullName || 'Nova Seller'}</b>
+                      {product.seller?.bio && <small className="muted" style={{ display: 'block' }}>{product.seller.bio}</small>}
+                      {product.seller?.publicLocation && <small className="muted" style={{ display: 'block' }}>{product.seller.publicLocation}</small>}
+                      {product.seller?.verifiedSeller && <small className="muted" style={{ display: 'block', marginTop: 4 }}>Nova-checked seller · Valid until {new Date(product.seller.verifiedSeller.expiresAt).toLocaleDateString()}. This badge is not a guarantee of product quality or transaction safety.</small>}
+                    </div>
+                  </div>
                 </div>
 
                 <div>

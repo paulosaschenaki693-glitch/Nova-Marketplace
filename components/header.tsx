@@ -15,6 +15,7 @@ import {
   User,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-provider';
+import { ProfileAvatar } from '@/components/profile-avatar';
 
 type Account = {
   id: string;
@@ -23,6 +24,8 @@ type Account = {
   fullName: string | null;
   shopName: string | null;
   email: string | null;
+  profileImageUrl?: string | null;
+  verifiedSeller?: { id: string; expiresAt: string } | null;
   coinBalance?: number;
   reservedCoinBalance?: number;
 };
@@ -50,7 +53,6 @@ export function Header() {
     };
   }, []);
 
-  const profileLabel = (user?.fullName || user?.shopName || user?.email || 'Profile').slice(0, 1).toUpperCase();
 
   async function signOut() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -62,7 +64,7 @@ export function Header() {
   const accountLinks = user ? (
     <>
       <Link href="/profile" onClick={close} className="mobile-nav-item">
-        <span className="profile-avatar" style={{ width: 28, height: 28, fontSize: 13 }}>{profileLabel}</span>
+        <ProfileAvatar name={user.fullName || user.shopName || user.email} imageUrl={user.profileImageUrl} verified={Boolean(user.verifiedSeller)} size={28} />
         <span>My Profile Account</span>
       </Link>
       <button type="button" className="mobile-nav-item" onClick={signOut}>
@@ -154,9 +156,7 @@ export function Header() {
 
           {loaded && (
             user ? (
-              <Link className="profile-avatar header-avatar" href="/profile" aria-label="Open profile">
-                {profileLabel}
-              </Link>
+              <Link href="/profile" aria-label="Open profile" style={{display:"inline-flex",textDecoration:"none"}}><ProfileAvatar name={user.fullName || user.shopName || user.email} imageUrl={user.profileImageUrl} verified={Boolean(user.verifiedSeller)} size={40} className="header-avatar" /></Link>
             ) : (
               <Link className="btn btn-primary header-signin" href="/login">
                 Sign in

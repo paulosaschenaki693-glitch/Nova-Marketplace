@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
+  ShieldCheck,
   ClipboardCheck,
   Coins,
   Flag,
@@ -21,6 +22,7 @@ import { useEffect, useState } from 'react';
 const primaryNav = [
   { href: '/admin/dashboard', label: 'Dashboard & Metrics', icon: LayoutDashboard },
   { href: '/admin/users', label: 'User Directory', icon: Users },
+  { href: '/admin/verified-sellers', label: 'Verified Sellers', icon: ShieldCheck },
   { href: '/admin/coins', label: 'Coin Approvals', icon: Coins, highlight: true },
   { href: '/admin/listings', label: 'Listing Moderation', icon: ClipboardCheck },
   { href: '/admin/categories', label: 'Category & Templates', icon: Settings },
