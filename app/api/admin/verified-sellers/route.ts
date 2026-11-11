@@ -8,8 +8,11 @@ export async function GET(req: Request) {
   if (!admin) return NextResponse.json({ error: 'Admin access required.' }, { status: 403 });
   try {
     const url = new URL(req.url), status = url.searchParams.get('status'), q = url.searchParams.get('q')?.trim();
+    const now = new Date();
     const where: any = {
-      ...(status && ['PENDING', 'ACTIVE', 'SUSPENDED', 'REVOKED', 'EXPIRED'].includes(status) ? { status } : {}),
+      ...(status === 'EXPIRED' ? { OR: [{ status: 'EXPIRED' }, { status: 'ACTIVE', expiresAt: { lte: now } }] }
+        : status === 'ACTIVE' ? { status: 'ACTIVE', expiresAt: { gt: now } }
+        : status && ['PENDING', 'SUSPENDED', 'REVOKED'].includes(status) ? { status } : {}),
       ...(q ? { user: { OR: [
         { fullName: { contains: q, mode: 'insensitive' } }, { shopName: { contains: q, mode: 'insensitive' } },
         { email: { contains: q, mode: 'insensitive' } }, { phone: { contains: q } },
@@ -19,7 +22,6 @@ export async function GET(req: Request) {
       where, include: { user: { select: { id: true, role: true, status: true, fullName: true, shopName: true, email: true, phone: true, profileImageUrl: true } } },
       orderBy: { createdAt: 'desc' }, take: 300,
     });
-    const now = new Date();
     return NextResponse.json(rows.map(row => ({
       ...row, feeAmount: row.feeAmount.toString(),
       effectiveStatus: row.status === 'ACTIVE' && row.expiresAt && row.expiresAt <= now ? 'EXPIRED' : row.status,
@@ -87,13 +89,13 @@ export async function PATCH(req: Request) {
       const title = action === 'activate' ? 'Nova Verified Seller badge activated'
         : action === 'suspend' ? 'Nova Verified Seller badge suspended'
         : action === 'revoke' ? 'Nova Verified Seller badge revoked'
-        : action === 'restore' ? 'Nova Verified Seller badge restored' : 'Nova requested a response about your verification';
+        : action === 'restore' ? (current.startsAt ? 'Nova Verified Seller badge restored' : 'Verification application returned to review') : 'Nova requested a response about your verification';
       const notice = action === 'activate'
         ? 'Your Nova Verified Seller badge is active for six months. Check your verification page for expiry and agreement.'
         : action === 'request_response' ? `Nova needs your response: ${reason}`
         : action === 'suspend' ? `Your badge is temporarily hidden while Nova reviews a compliance concern. Reason: ${reason}`
         : action === 'revoke' ? `Your verification was revoked. Reason: ${reason}`
-        : action === 'restore' ? 'Your Nova Verified Seller badge has been restored.' : '';
+        : action === 'restore' ? (current.startsAt ? 'Your Nova Verified Seller badge has been restored.' : 'Your application has been returned to pending review.') : '';
       await tx.notification.create({ data: { userId: current.userId, type: 'SYSTEM', title, body: notice, priority: ['suspend', 'revoke'].includes(action) ? 'HIGH' : 'NORMAL' } });
     });
     return NextResponse.json({ ok: true });
