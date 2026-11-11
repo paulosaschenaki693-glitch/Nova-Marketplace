@@ -29,7 +29,7 @@ export async function GET() {
     });
     if (!user) return NextResponse.json({ user: null });
     const { verifiedSellerRecords, ...safeUser } = user;
-    return NextResponse.json({ user: { ...safeUser, verifiedSeller: verifiedSellerRecords[0] || null } });
+    return NextResponse.json({ user: { ...safeUser, verifiedSeller: safeUser.status === 'ACTIVE' ? verifiedSellerRecords[0] || null : null } });
   } catch {
     return NextResponse.json({ error: 'Unable to load account.' }, { status: 500 });
   }
