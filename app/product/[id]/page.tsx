@@ -302,6 +302,7 @@ export default function ProductDetail() {
                       <b>{product.seller?.shopName || product.seller?.fullName || 'Nova Seller'}</b>
                       {product.seller?.bio && <small className="muted" style={{ display: 'block' }}>{product.seller.bio}</small>}
                       {product.seller?.publicLocation && <small className="muted" style={{ display: 'block' }}>{product.seller.publicLocation}</small>}
+                      {product.seller?.verifiedSeller && <small className="muted" style={{ display: 'block', marginTop: 4 }}>Nova-checked seller · Valid until {new Date(product.seller.verifiedSeller.expiresAt).toLocaleDateString()}. This badge is not a guarantee of product quality or transaction safety.</small>}
                     </div>
                   </div>
                 </div>
