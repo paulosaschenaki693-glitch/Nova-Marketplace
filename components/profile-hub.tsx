@@ -22,6 +22,7 @@ import {
   PanelLeft,
 } from 'lucide-react';
 import { COIN_PACKAGES, CUSTOM_COIN_RATES, calculateCoinsCost } from '@/lib/coins';
+import { ProfileAvatar } from '@/components/profile-avatar';
 
 const sections = [
   { id: 'overview', label: 'Overview', icon: UserRound },
@@ -216,9 +217,7 @@ export default function ProfileHub() {
             </button>
 
             <div className="profile-user">
-              <span className="profile-avatar">
-                {(user?.fullName || user?.shopName || user?.email || 'N').slice(0, 1).toUpperCase()}
-              </span>
+              <ProfileAvatar name={user?.fullName || user?.shopName || user?.email} imageUrl={user?.profileImageUrl} verified={Boolean(user?.verifiedSeller)} size={48} />
               <div>
                 <b>{user?.fullName || user?.shopName || 'Your account'}</b>
                 <small className="muted">
@@ -315,7 +314,7 @@ export default function ProfileHub() {
               <div>
                 <p className="pill">ACCOUNT & WALLET</p>
                 <h1>{heading}</h1>
-                <p className="muted">Manage your Nova Campus Marketplace profile, listings, and coin wallet.</p>
+                <p className="muted">Manage your Nova Marketplace profile, listings, and coin wallet.</p>
               </div>
             </div>
 
@@ -366,7 +365,8 @@ export default function ProfileHub() {
                 </div>
 
                 <div className="surface profile-details">
-                  <h3>Account information</h3>
+                  <div className="row" style={{justifyContent:"space-between",gap:10,flexWrap:"wrap"}}><h3>Account information</h3><Link href="/profile/edit" className="btn btn-primary">Edit profile</Link></div>
+                  <Link href="/profile/verified" className="btn btn-ghost" style={{marginBottom:12}}>Nova Verified Seller</Link>
                   <Info label="Name / shop" value={user?.fullName || user?.shopName} />
                   <Info label="Email" value={user?.email} />
                   <Info label="Phone" value={user?.phone} />
