@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     if (file.size < 1 || file.size > 5 * 1024 * 1024) return NextResponse.json({ error: 'Profile image must be 5 MB or smaller.' }, { status: 400 });
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) return NextResponse.json({ error: 'Use JPG, PNG, WebP, or AVIF.' }, { status: 400 });
     const uploaded = await uploadMarketplaceFile(file, 'profile-image');
-    await prisma.user.update({ where: { id: user.id }, data: { profileImageUrl: uploaded.url } });
+    await prisma.user.update({ where: { id: user.id }, data: { profileImageUrl: uploaded.url, profileImagePublicConsentAt: new Date() } });
     return NextResponse.json({ ok: true, profileImageUrl: uploaded.url });
   } catch (error) {
     console.error('[uploads.profile-image]', error);
