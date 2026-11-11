@@ -89,7 +89,8 @@ export async function GET(req: Request) {
         });
       });
     }
-\n    return NextResponse.json({ ok: true, expiringSoonNotified: expiringSoon.length, expiredCount: expired.length, verificationsExpiringSoon: verificationsExpiringSoon.length, expiredVerifications: expiredVerifications.length, checkedAt: now.toISOString() });
+
+    return NextResponse.json({ ok: true, expiringSoonNotified: expiringSoon.length, expiredCount: expired.length, verificationsExpiringSoon: verificationsExpiringSoon.length, expiredVerifications: expiredVerifications.length, checkedAt: now.toISOString() });
   } catch (error) {
     console.error('[cron.expire-listings]', error);
     return NextResponse.json({ error: 'Unable to process listing expiration.' }, { status: 500 });
