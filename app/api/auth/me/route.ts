@@ -18,7 +18,7 @@ export async function GET() {
         bio: true,
         publicLocation: true,
         telegramHandle: true,
-        verifiedSellerRecords: { where: { status: 'ACTIVE', expiresAt: { gt: new Date() } }, select: { id: true, expiresAt: true }, orderBy: { expiresAt: 'desc' }, take: 1 },
+        verifiedSellerRecords: { where: { status: 'ACTIVE', expiresAt: { gt: new Date() } }, select: { id: true, startsAt: true, expiresAt: true }, orderBy: { expiresAt: 'desc' }, take: 1 },
         email: true,
         phone: true,
         studentIdNo: true,
