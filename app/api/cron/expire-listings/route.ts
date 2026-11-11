@@ -50,7 +50,46 @@ export async function GET(req: Request) {
         });
       });
     }
-    return NextResponse.json({ ok: true, expiringSoonNotified: expiringSoon.length, expiredCount: expired.length, checkedAt: now.toISOString() });
+
+    const verificationSoonStart = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const verificationSoonEnd = new Date(now.getTime() + 31 * 24 * 60 * 60 * 1000);
+    const verificationsExpiringSoon = await prisma.verifiedSeller.findMany({
+      where: { status: 'ACTIVE', expiresAt: { gte: verificationSoonStart, lt: verificationSoonEnd } },
+      select: { id: true, userId: true, expiresAt: true },
+    });
+    if (verificationsExpiringSoon.length) {
+      await prisma.notification.createMany({
+        data: verificationsExpiringSoon.map(row => ({
+          userId: row.userId, type: 'SYSTEM' as const,
+          title: 'Nova Verified Seller badge expires in 30 days',
+          body: 'Your six-month Nova Verified Seller term is nearly complete. Contact Nova to arrange renewal.',
+          dedupeKey: `verified-seller-expiring-30d:${row.id}:${row.expiresAt?.toISOString() || ''}`,
+        })),
+        skipDuplicates: true,
+      });
+    }
+    const expiredVerifications = await prisma.verifiedSeller.findMany({
+      where: { status: 'ACTIVE', expiresAt: { lte: now } },
+      select: { id: true, userId: true, expiresAt: true },
+    });
+    if (expiredVerifications.length) {
+      await prisma.$transaction(async tx => {
+        await tx.verifiedSeller.updateMany({
+          where: { id: { in: expiredVerifications.map(row => row.id) }, status: 'ACTIVE', expiresAt: { lte: now } },
+          data: { status: 'EXPIRED' },
+        });
+        await tx.notification.createMany({
+          data: expiredVerifications.map(row => ({
+            userId: row.userId, type: 'SYSTEM' as const,
+            title: 'Nova Verified Seller badge expired',
+            body: 'Your six-month verification term has ended. Apply again to complete a new agreement and payment process.',
+            dedupeKey: `verified-seller-expired:${row.id}:${row.expiresAt?.toISOString() || ''}`,
+          })),
+          skipDuplicates: true,
+        });
+      });
+    }
+\n    return NextResponse.json({ ok: true, expiringSoonNotified: expiringSoon.length, expiredCount: expired.length, verificationsExpiringSoon: verificationsExpiringSoon.length, expiredVerifications: expiredVerifications.length, checkedAt: now.toISOString() });
   } catch (error) {
     console.error('[cron.expire-listings]', error);
     return NextResponse.json({ error: 'Unable to process listing expiration.' }, { status: 500 });
