@@ -27,7 +27,7 @@ export async function GET(
             profileImageUrl: true,
             bio: true,
             publicLocation: true,
-            verifiedSellerRecords: { where: { status: 'ACTIVE', expiresAt: { gt: new Date() } }, select: { id: true, expiresAt: true }, orderBy: { expiresAt: 'desc' }, take: 1 },
+            verifiedSellerRecords: { where: { status: 'ACTIVE', expiresAt: { gt: new Date() } }, select: { id: true, startsAt: true, expiresAt: true }, orderBy: { expiresAt: 'desc' }, take: 1 },
           },
         },
       },
