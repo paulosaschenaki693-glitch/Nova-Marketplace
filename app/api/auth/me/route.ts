@@ -14,6 +14,11 @@ export async function GET() {
         status: true,
         fullName: true,
         shopName: true,
+        profileImageUrl: true,
+        bio: true,
+        publicLocation: true,
+        telegramHandle: true,
+        verifiedSellerRecords: { where: { status: 'ACTIVE', expiresAt: { gt: new Date() } }, select: { id: true, expiresAt: true }, orderBy: { expiresAt: 'desc' }, take: 1 },
         email: true,
         phone: true,
         studentIdNo: true,
@@ -23,7 +28,8 @@ export async function GET() {
       },
     });
     if (!user) return NextResponse.json({ user: null });
-    return NextResponse.json({ user });
+    const { verifiedSellerRecords, ...safeUser } = user;
+    return NextResponse.json({ user: { ...safeUser, verifiedSeller: verifiedSellerRecords[0] || null } });
   } catch {
     return NextResponse.json({ error: 'Unable to load account.' }, { status: 500 });
   }
